@@ -1,0 +1,55 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build CPU version
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: make cpu
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: md5hack_cpu
+          path: md5hack_cpu
+
+  release:
+    name: Publish release
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Download binary
+        uses: actions/download-artifact@v4
+        with:
+          name: md5hack_cpu
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: md5hack ${{ github.ref_name }}
+          body: |
+            ## md5hack ${{ github.ref_name }}
+
+            GPU-accelerated MD5 bruteforce cracker using CUDA.
+            Educational project to learn CUDA and demonstrate MD5 weakness.
+
+            ### Binaries
+
+            - `md5hack_cpu` — CPU-only version (no GPU required)
+            - GPU version requires CUDA toolkit: build with `make gpu`
+
+            ### Usage
+            ```
+            ./md5hack_cpu <md5_hash> <password_length>
+            ```
+          files: |
+            md5hack_cpu

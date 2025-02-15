@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-cpu:
+    name: CPU version (C)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build CPU version
+        run: make cpu
+
+      - name: Show binary size
+        run: ls -lh md5hack_cpu
+
+      - name: Quick test
+        run: ./md5hack_cpu 202cb962ac59075b964b07152d234b70 3
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: md5hack_cpu
+          path: md5hack_cpu
